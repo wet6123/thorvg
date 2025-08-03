@@ -214,7 +214,6 @@ enum class BlendMethod : uint8_t
     Color,             ///< Combine with HSL(Sh + Ss + Dl) then convert it to RGB. @since 1.0
     Luminosity,        ///< Combine with HSL(Dh + Ds + Sl) then convert it to RGB. @since 1.0
     Add,               ///< Simply adds pixel values of one layer with the other. (S + D)
-    HardMix,           ///< Adds S and D; result is 255 if the sum is greater than or equal to 255, otherwise 0. @since 1.0
     Composition = 255  ///< Used for intermediate composition. Only valid when applied to a Scene. @since 1.0
 };
 
@@ -264,10 +263,14 @@ enum class Type : uint8_t
 
 /**
  * @brief A data structure representing a point in two-dimensional space.
+ *
+ * This structure defines a single point using Cartesian coordinates.
+ * It is typically used for specifying positions or coordinates in 2D graphics.
  */
 struct Point
 {
-    float x, y;
+    float x;  ///< The x-coordinate of the point.
+    float y;  ///< The y-coordinate of the point.
 };
 
 
@@ -455,6 +458,32 @@ public:
     Result bounds(float* x, float* y, float* w, float* h) const noexcept;
 
     /**
+     * @brief Checks whether a given region intersects the filled area of the paint.
+     *
+     * This function determines whether the specified rectangular region—defined by (`x`, `y`, `w`, `h`)—
+     * intersects the geometric fill region of the paint object.
+     *
+     * This is useful for hit-testing purposes, such as detecting whether a user interaction (e.g., touch or click)
+     * occurs within a visible painted region.
+     *
+     * The paint must be updated in a Canvas beforehand—typically after the Canvas has been
+     * drawn and synchronized.
+     *
+     * @param[in] x The x-coordinate of the top-left corner of the test region.
+     * @param[in] y The y-coordinate of the top-left corner of the test region.
+     * @param[in] w The width of the region to test. Must be greater than 0; defaults to 1.
+     * @param[in] h The height of the region to test. Must be greater than 0; defaults to 1.
+     *
+     * @return @c true if any part of the region intersects the filled area; otherwise, @c false.
+     *
+     * @note To test a single point, set the region size to w = 1, h = 1.
+     * @note For efficiency, an AABB (axis-aligned bounding box) test is performed internally before precise hit detection.
+     * @note This test does not take into account the results of blending or masking.
+     * @note Experimental API.
+     */
+    bool intersects(int32_t x, int32_t y, int32_t w = 1, int32_t h = 1) noexcept;
+
+    /**
      * @brief Duplicates the object.
      *
      * Creates a new object and sets its all properties as in the original object.
@@ -548,7 +577,7 @@ public:
      *
      * @return The class type ID of the Paint instance.
      *
-     * @since Experimental API
+     * @note Experimental API
      */
     virtual Type type() const noexcept = 0;
 
@@ -557,7 +586,7 @@ public:
      *
      * This is reserved to specify an paint instance in a scene.
      *
-     * @since Experimental API
+     * @note Experimental API
      */
     uint32_t id = 0;
 
@@ -658,7 +687,7 @@ public:
      *
      * @return The class type ID of the Fill instance.
      *
-     * @since Experimental API
+     * @note Experimental API
      */
     virtual Type type() const noexcept = 0;
 
@@ -852,7 +881,7 @@ public:
      *
      * @return The class type ID of the LinearGradient instance.
      *
-     * @since Experimental API
+     * @note Experimental API
      */
     Type type() const noexcept override;
 
@@ -925,7 +954,7 @@ public:
      *
      * @return The class type ID of the LinearGradient instance.
      *
-     * @since Experimental API
+     * @note Experimental API
      */
     Type type() const noexcept override;
 
@@ -1320,7 +1349,7 @@ public:
      *
      * @return The class type ID of the Shape instance.
      *
-     * @since Experimental API
+     * @note Experimental API
      */
     Type type() const noexcept override;
 
@@ -1450,7 +1479,7 @@ public:
      *
      * @return The class type ID of the Picture instance.
      *
-     * @since Experimental API
+     * @note Experimental API
      */
     Type type() const noexcept override;
 
@@ -1555,7 +1584,7 @@ public:
      *
      * @return The class type ID of the Scene instance.
      *
-     * @since Experimental API
+     * @note Experimental API
      */
     Type type() const noexcept override;
 
@@ -1717,7 +1746,7 @@ public:
      *
      * @return The class type ID of the Text instance.
      *
-     * @since Experimental API
+     * @note Experimental API
      */
     Type type() const noexcept override;
 
@@ -1871,20 +1900,24 @@ class TVG_API Initializer final
 {
 public:
     /**
-     * @brief Initializes the ThorVG engine.
+     * @brief Initializes the ThorVG engine runtime.
      *
-     * ThorVG requires an active runtime environment to operate.
-     * Internally, it utilizes a task scheduler to efficiently parallelize rendering operations.
-     * You can specify the number of worker threads using the @p threads parameter.
-     * During initialization, ThorVG will spawn the specified number of threads.
+     * ThorVG requires an active runtime environment for rendering operations.
+     * This function sets up an internal task scheduler and creates a specified number
+     * of worker threads to enable parallel rendering.
      *
-     * @param[in] threads The number of worker threads to create. A value of zero indicates that only the main thread will be used.
+     * @param[in] threads The number of worker threads to launch.
+     *                    A value of 0 indicates that only the main thread will be used.
      *
-     * @note The initializer uses internal reference counting to track multiple calls.
-     *       The number of threads is fixed on the first call to init() and cannot be changed in subsequent calls.
+     * @return Result indicating success or failure of initialization.
+     *
+     * @note This function uses internal reference counting to allow multiple init() calls.
+     *       However, the number of threads is fixed during the first successful initialization
+     *       and cannot be changed in subsequent calls.
+     *
      * @see Initializer::term()
      */
-    static Result init(uint32_t threads) noexcept;
+    static Result init(uint32_t threads = 0) noexcept;
 
     /**
      * @brief Terminates the ThorVG engine.

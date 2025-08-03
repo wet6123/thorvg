@@ -77,7 +77,7 @@ struct SceneImpl : Scene
     ~SceneImpl()
     {
         clearPaints();
-        resetEffects();
+        resetEffects(false);
     }
 
     void size(const Point& size)
@@ -258,6 +258,19 @@ struct SceneImpl : Scene
         return Result::Success;
     }
 
+    bool intersects(const RenderRegion& region)
+    {
+        if (!impl.renderer) return false;
+
+        if (this->bounds(impl.renderer).intersected(region)) {
+            for (auto paint : paints) {
+                if (PAINT(paint)->intersects(region)) return true;
+            }
+        }
+
+        return false;
+    }
+
     Paint* duplicate(Paint* ret)
     {
         if (ret) TVGERR("RENDERER", "TODO: duplicate()");
@@ -372,7 +385,7 @@ struct SceneImpl : Scene
         return new SceneIterator(&paints);
     }
 
-    Result resetEffects()
+    Result resetEffects(bool damage = true)
     {
         if (effects) {
             ARRAY_FOREACH(p, *effects) {
@@ -381,6 +394,7 @@ struct SceneImpl : Scene
             }
             delete(effects);
             effects = nullptr;
+            if (damage) impl.damage(vport);
         }
         return Result::Success;
     }

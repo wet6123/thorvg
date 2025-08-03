@@ -981,7 +981,7 @@ const RenderSurface* GlRenderer::mainSurface()
 bool GlRenderer::blend(BlendMethod method)
 {
     //TODO: support
-    if (method == BlendMethod::Hue || method == BlendMethod::Saturation || method == BlendMethod::Color || method == BlendMethod::Luminosity || method == BlendMethod::HardMix) return false;
+    if (method == BlendMethod::Hue || method == BlendMethod::Saturation || method == BlendMethod::Color || method == BlendMethod::Luminosity) return false;
 
     if (method == mBlendMethod) return true;
 
@@ -1258,6 +1258,22 @@ void GlRenderer::damage(TVG_UNUSED RenderData rd, TVG_UNUSED const RenderRegion&
 bool GlRenderer::partial(bool disable)
 {
     //TODO
+    return false;
+}
+
+
+bool GlRenderer::intersectsShape(RenderData data, TVG_UNUSED const RenderRegion& region)
+{
+    if (!data) return false;
+    TVGLOG("GL_ENGINE", "Paint::intersect() is not supported!");
+    return false;
+}
+
+
+bool GlRenderer::intersectsImage(RenderData data, TVG_UNUSED const RenderRegion& region)
+{
+    if (!data) return false;
+    TVGLOG("GL_ENGINE", "Paint::intersect() is not supported!");
     return false;
 }
 

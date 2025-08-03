@@ -322,6 +322,15 @@ Result Paint::Impl::bounds(Point* pt4, Matrix* pm, bool obb, bool stroking)
 }
 
 
+bool Paint::Impl::intersects(const RenderRegion& region)
+{
+    if (!renderer) return false;
+    bool ret;
+    PAINT_METHOD(ret, intersects(region));
+    return ret;
+}
+
+
 /************************************************************************/
 /* External Class Implementation                                        */
 /************************************************************************/
@@ -379,6 +388,13 @@ Result Paint::bounds(Point* pt4) const noexcept
 }
 
 
+bool Paint::intersects(int32_t x, int32_t y, int32_t w, int32_t h) noexcept
+{
+    if (w <= 0 || h <= 0) return false;
+    return pImpl->intersects({{x, y}, {x + w, y + h}});
+}
+
+
 Paint* Paint::duplicate() const noexcept
 {
     return pImpl->duplicate();
@@ -430,7 +446,7 @@ uint8_t Paint::opacity() const noexcept
 Result Paint::blend(BlendMethod method) noexcept
 {
     //Composition is only allowed to Scene.
-    if (method <= BlendMethod::HardMix || (method == BlendMethod::Composition && type() == Type::Scene)) {
+    if (method <= BlendMethod::Add || (method == BlendMethod::Composition && type() == Type::Scene)) {
         pImpl->blend(method);
         return Result::Success;
     }

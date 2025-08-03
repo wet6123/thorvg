@@ -164,7 +164,6 @@ typedef enum {
     TVG_BLEND_METHOD_COLOR,             ///< Combine with HSL(Sh + Ss + Dl) then convert it to RGB.
     TVG_BLEND_METHOD_LUMINOSITY,        ///< Combine with HSL(Dh + Ds + Sl) then convert it to RGB.
     TVG_BLEND_METHOD_ADD,               ///< Simply adds pixel values of one layer with the other. (S + D)
-    TVG_BLEND_METHOD_HARDMIX,           ///< Adds S and D; result is 255 if the sum is greater than or equal to 255, otherwise 0.
     TVG_BLEND_METHOD_COMPOSITION = 255  ///< Used for intermediate composition. @since 1.0
 } Tvg_Blend_Method;
 
@@ -853,6 +852,34 @@ TVG_API Tvg_Result tvg_paint_get_opacity(const Tvg_Paint* paint, uint8_t* opacit
 * @return A copied Tvg_Paint object if succeed, @c nullptr otherwise.
 */
 TVG_API Tvg_Paint* tvg_paint_duplicate(Tvg_Paint* paint);
+
+
+/**
+ * @brief Checks whether a given region intersects the filled area of the paint.
+ *
+ * This function determines whether the specified rectangular region—defined by (`x`, `y`, `w`, `h`)—
+ * intersects the geometric fill region of the paint object.
+ *
+ * This is useful for hit-testing purposes, such as detecting whether a user interaction (e.g., touch or click)
+ * occurs within a visible painted region.
+ *
+ * The paint must be updated in a Canvas beforehand—typically after the Canvas has been
+ * drawn and synchronized.
+ *
+ * @param[in] paint A Tvg_Paint pointer to the shape object to be tested.
+ * @param[in] x The x-coordinate of the top-left corner of the test region.
+ * @param[in] y The y-coordinate of the top-left corner of the test region.
+ * @param[in] w The width of the region to test. Must be greater than 0; defaults to 1.
+ * @param[in] h The height of the region to test. Must be greater than 0; defaults to 1.
+ *
+ * @return @c true if any part of the region intersects the filled area; otherwise, @c false.
+ *
+ * @note To test a single point, set the region size to w = 1, h = 1.
+ * @note For efficiency, an AABB (axis-aligned bounding box) test is performed internally before precise hit detection.
+ * @note This test does not take into account the results of blending or masking.
+ * @note Experimental API.
+ */
+TVG_API bool tvg_paint_intersects(Tvg_Paint* paint, int32_t x, int32_t y, int32_t w, int32_t h);
 
 
 /**

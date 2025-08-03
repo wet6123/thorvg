@@ -44,6 +44,8 @@ public:
     const RenderSurface* mainSurface() override;
     bool clear() override;
     bool sync() override;
+    bool intersectsImage(RenderData data, const RenderRegion& region) override;
+    bool intersectsShape(RenderData data, const RenderRegion& region) override;
     bool target(WGPUDevice device, WGPUInstance instance, void* target, uint32_t width, uint32_t height, int type = 0);
 
     //composition
@@ -78,7 +80,6 @@ private:
     WgRenderTarget mRenderTargetRoot;
     Array<WgCompose*> mCompositorList;
     Array<WgRenderTarget*> mRenderTargetStack;
-    Array<WgRenderDataViewport*> mRenderDataViewportList;
     Array<WgSceneTask*> mSceneTaskStack;
     Array<WgRenderTask*> mRenderTaskList;
 
@@ -88,7 +89,6 @@ private:
     // render data paint pools
     WgRenderDataShapePool mRenderDataShapePool;
     WgRenderDataPicturePool mRenderDataPicturePool;
-    WgRenderDataViewportPool mRenderDataViewportPool;
     WgRenderDataEffectParamsPool mRenderDataEffectParamsPool;
 
     // rendering context

@@ -41,7 +41,6 @@ void WgRenderer::release()
     // clear render data paint pools
     mRenderDataShapePool.release(mContext);
     mRenderDataPicturePool.release(mContext);
-    mRenderDataViewportPool.release(mContext);
     mRenderDataEffectParamsPool.release(mContext);
 
     // clear render  pool
@@ -253,10 +252,6 @@ bool WgRenderer::postRender()
     mRenderTaskList.clear();
     ARRAY_FOREACH(p, mCompositorList) { delete (*p); };
     mCompositorList.clear();
-    ARRAY_FOREACH(p, mRenderDataViewportList) {
-        mRenderDataViewportPool.free(mContext, *p);
-    }
-    mRenderDataViewportList.clear();
     return true;
 }
 
@@ -284,7 +279,7 @@ RenderRegion WgRenderer::region(RenderData data)
 bool WgRenderer::blend(BlendMethod method)
 {
     //TODO: support
-    if (method == BlendMethod::Hue || method == BlendMethod::Saturation || method == BlendMethod::Color || method == BlendMethod::Luminosity || method == BlendMethod::HardMix) return false;
+    if (method == BlendMethod::Hue || method == BlendMethod::Saturation || method == BlendMethod::Color || method == BlendMethod::Luminosity) return false;
 
     mBlendMethod = (method == BlendMethod::Composition ? BlendMethod::Normal : method);
 
@@ -431,12 +426,6 @@ RenderCompositor* WgRenderer::target(const RenderRegion& region, TVG_UNUSED Colo
     // create and setup compose data
     WgCompose* compose = new WgCompose();
     compose->aabb = region;
-    if (flags & PostProcessing) {
-        compose->aabb = region;
-        compose->rdViewport = mRenderDataViewportPool.allocate(mContext);
-        compose->rdViewport->update(mContext, region);
-        mRenderDataViewportList.push(compose->rdViewport);
-    }
     mCompositorList.push(compose);
     return compose;
 }
@@ -586,6 +575,22 @@ void WgRenderer::damage(TVG_UNUSED RenderData rd, TVG_UNUSED const RenderRegion&
 bool WgRenderer::partial(bool disable)
 {
     //TODO
+    return false;
+}
+
+
+bool WgRenderer::intersectsShape(RenderData data, TVG_UNUSED const RenderRegion& region)
+{
+    if (!data) return false;
+    TVGLOG("WG_ENGINE", "Paint::intersect() is not supported!");
+    return false;
+}
+
+
+bool WgRenderer::intersectsImage(RenderData data, TVG_UNUSED const RenderRegion& region)
+{
+    if (!data) return false;
+    TVGLOG("WG_ENGINE", "Paint::intersect() is not supported!");
     return false;
 }
 
