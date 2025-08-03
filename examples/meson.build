@@ -20,6 +20,8 @@ if all_engines or get_option('engines').contains('wg')
 endif
 
 source_file = [
+    '01.MyExample.cpp',
+    '02.Fractal.cpp',
     '03.SierpinskiTriangle.cpp',
     'Accessor.cpp',
     'Animation.cpp',
